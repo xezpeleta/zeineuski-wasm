@@ -91,9 +91,6 @@ function buildExampleCards() {
 
       // Set text without auto-predicting — user clicks Identify manually
       el.input.value = ex.text;
-
-      // Clear previous results
-      el.result.classList.remove("visible");
     });
   });
 }

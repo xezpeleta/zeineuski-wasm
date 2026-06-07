@@ -65,13 +65,17 @@ export async function loadModels(onProgress) {
   if (_loaded) return { binaryModel, dialectModel };
 
   onProgress?.("WASM module loading…");
-  const ft = await getFastText();
+  
+  // Each model needs its own FastTextClass instance — the C++ core
+  // is shared per instance, so loading a second model would overwrite the first.
+  const ftBinary = await getFastText();
+  const ftDialect = await getFastText();
 
   onProgress?.("Binary model loading (21MB)…");
-  binaryModel = await ft.loadModel(MODEL_FILES.binary);
+  binaryModel = await ftBinary.loadModel(MODEL_FILES.binary);
 
   onProgress?.("Dialect model loading (13MB)…");
-  dialectModel = await ft.loadModel(MODEL_FILES.dialect);
+  dialectModel = await ftDialect.loadModel(MODEL_FILES.dialect);
 
   _loaded = true;
   onProgress?.("✓ Ready");

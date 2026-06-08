@@ -351,6 +351,9 @@
     <div class="status-bar">
       <div class="status-dot loading" id="statusDot"></div>
       <span id="statusText">Loading model… Modela kargatzen…</span>
+      <span id="statusDetail" style="display:block;font-size:0.85rem;color:var(--muted);margin-top:4px">
+        (31MB download + WASM parsing ~5s)
+      </span>
     </div>
     <div class="size-hint" id="sizeHint">
       <span class="green">&#10003;</span> Model loaded — <strong id="variantSize"></strong>MB total (31MB)
@@ -419,6 +422,7 @@
     const el = {
       statusDot: $("statusDot"),
       statusText: $("statusText"),
+      statusDetail: $("statusDetail"),
       sizeHint: $("sizeHint"),
       variantSize: $("variantSize"),
       input: $("input"),
@@ -569,7 +573,8 @@
       try {
         await loadModel((msg) => {
           el.statusText.textContent = msg;
-          if (msg === "✓ Ready") {
+          el.statusDetail.textContent = "";
+          if (msg.includes("✅ Ready")) {
             el.statusDot.className = "status-dot ready";
             el.btnPredict.disabled = false;
             el.sizeHint.style.display = "block";

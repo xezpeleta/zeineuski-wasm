@@ -55,14 +55,17 @@ function getModelLabel(el) {
  * Find a human-readable town name for the hovered element.
  */
 function getElementName(el) {
-  if (el.id && !el.id.startsWith("path") && !el.id.startsWith("use")) return el.id;
+  // All 281 named towns have their name as the path's id.
+  // Path IDs that are just "path123" are unnamed municipality polygons.
+  const pid = el.getAttribute("id") || el.id;
+  if (pid && !/^(path|use)\d/i.test(pid) && pid !== "false") return pid;
 
+  // Fallback: some towns are wrapped in a parent <g>
   const parent = el.closest("g[id]");
-  if (parent && parent.id) {
-    if (parent.hasAttributeNS?.(NS_INKSCAPE, "label")) return null;
-    const gid = parent.id;
-    if (!gid.startsWith("g") && !gid.startsWith("layer") && !gid.startsWith("svg")) {
-      return gid;
+  if (parent) {
+    const gid = parent.getAttribute("id") || parent.id;
+    if (gid && !/^(g|layer|svg|defs)\d/i.test(gid) && gid !== "false") {
+      if (!parent.hasAttributeNS?.(NS_INKSCAPE, "label")) return gid;
     }
   }
   return null;

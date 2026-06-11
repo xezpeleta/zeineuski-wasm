@@ -74,7 +74,7 @@ function runPrediction() {
       runnerUp && runnerUp.confidence >= Math.max(0.05, result.confidence * 0.35)
         ? runnerUp.label
         : null;
-    window.euskalkid?.pinLabel(modelLabel, secondaryLabel);
+    window.euskalkid?.pinLabel(modelLabel, secondaryLabel, result.confidence);
   } catch (err) {
     console.error("Prediction error:", err);
   }

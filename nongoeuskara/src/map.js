@@ -180,12 +180,13 @@ function clearHighlight() {
 }
 
 /** Highlight the predicted zone(s) and show them in the header badge. */
-function pinLabel(modelLabel, secondaryLabel) {
+function pinLabel(modelLabel, secondaryLabel, confidence) {
   highlightLabel(modelLabel, secondaryLabel);
   const info = MODEL_LABELS[modelLabel];
   if (info && badge && badgeSwatch && badgeName) {
     badgeSwatch.style.backgroundColor = info.color;
-    badgeName.textContent = info.name;
+    const pct = confidence != null ? ` (${(confidence * 100).toFixed(0)}%)` : "";
+    badgeName.textContent = info.name + pct;
     const secondary = MODEL_LABELS[secondaryLabel];
     if (badgeSecondary) {
       badgeSecondary.textContent =

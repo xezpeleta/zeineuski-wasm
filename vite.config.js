@@ -27,7 +27,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
-        azpieuskalki: "azpieuskalki.html",
         nongoeuskara: "nongoeuskara/index.html",
       },
       output: {

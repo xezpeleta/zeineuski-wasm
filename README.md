@@ -10,20 +10,22 @@ the browser using WebAssembly (fastText).
 ## How it works
 
 1. A 423KB WebAssembly module (fastText compiled via Emscripten) loads in the browser
-2. Two compact fastText models (34MB total, hosted on Hugging Face CDN) are downloaded on first use
-3. Hierarchical 2-step classification:
-   - Binary: batua vs dialectal
-   - Dialect: 5-class euskalkiak
+2. The default model — a 12-class azpieuskalki (sub-dialect) model (~31MB) — is downloaded on page load and runs on every keystroke, highlighting the predicted zone on the map
+3. Clicking the info (i) icon opens the "Emaitza xehetuak" modal, which lazy-loads two additional models (~34MB) for a full 3-tier hierarchical classification:
+   - Tier 1 (binary): batua vs dialectal
+   - Tier 2 (dialect): 5-class euskalkiak
+   - Tier 3 (sub-dialect): 12-class azpieuskalkiak
 
 ## Model
 
-| Model | Size | XNLI Accuracy |
-|-------|------|---------------|
-| Binary (web) | 21MB | — |
-| Dialect (web) | 13MB | — |
-| **Total** | **34MB** | **96.84%** |
+| Model | Size | Description |
+|-------|------|-------------|
+| Azpieuskalki (quantized) | ~31MB | 12-class sub-dialect — the default model, loaded on page load |
+| Binary (web) | ~21MB | batua vs dialectal — lazy-loaded in the details modal |
+| Dialect (web) | ~13MB | 5-class euskalkiak — lazy-loaded in the details modal |
+| **Total** | **~65MB** | |
 
-Trained with dim=50, bucket=20K/50K — compressed from the original 1.6GB.
+The azpieuskalki model was updated (2025) with additional data to fix classification issues with Zuberotarra (Souletin).
 
 Models are hosted at [itzune/zeineuski](https://huggingface.co/itzune/zeineuski).
 

@@ -27,6 +27,34 @@ const MODEL_LABELS = {
   "ekialde-nafarra":      { name: "Ekialdeko nafarra",    color: "#ef4444" },
 };
 
+// Tier-2 euskalki each tier-3 azpieuskalki label belongs to. Used to shade the
+// broader dialect region in grey around the highlighted sub-zone ("you are
+// here, within this euskalki").
+const EUSKALKI_OF = {
+  "mendebal-sartaldea":   "bizkaiera",
+  "mendebal-sortaldea":   "bizkaiera",
+  "erdialde-sartaldea":   "gipuzkera",
+  "erdialde-sortaldea":   "gipuzkera",
+  "nafar-ipar-sartaldea": "nafarrera",
+  "nafar-erdigunea":      "nafarrera",
+  "nafar-hego-sartaldea": "nafarrera",
+  "nafar-sortaldea":      "nafarrera",
+  "naflap-sartaldea":     "nafar-lapurtera",
+  "naflap-sortaldea":     "nafar-lapurtera",
+  "zuberera":             "zuberera",
+  "ekialde-nafarra":      "ekialde-nafarra",
+};
+
+// Human-readable euskalki (tier-2 dialect) names.
+const EUSKALKI_NAMES = {
+  "bizkaiera":       "Bizkaiera",
+  "gipuzkera":       "Gipuzkera",
+  "nafarrera":       "Nafarrera",
+  "nafar-lapurtera": "Nafar-lapurtera",
+  "zuberera":        "Zuberera",
+  "ekialde-nafarra": "Ekialdeko nafarra",
+};
+
 const container = document.getElementById("mapContainer");
 const tooltip = document.getElementById("tooltip");
 const badge = document.getElementById("predictionBadge");
@@ -60,6 +88,27 @@ function buildMapStyles() {
        stroke-width: 1;
      }`,
   ];
+
+  // Parent euskalki context: when a zone is active, shade every municipality
+  // sharing its euskalki in a distinct grey. Pushed BEFORE the per-label color
+  // rules so the highlighted sub-zone (and runner-up) still win on equal
+  // specificity. Each euskalki gets one rule listing all its sibling labels.
+  const labelsByEuskalki = {};
+  for (const [label, eus] of Object.entries(EUSKALKI_OF)) {
+    (labelsByEuskalki[eus] ||= []).push(label);
+  }
+  for (const [eus, labels] of Object.entries(labelsByEuskalki)) {
+    const selector = labels
+      .map((l) => `svg[data-active-euskalki="${eus}"] .mun[data-model-label="${l}"]`)
+      .join(",\n     ");
+    rules.push(
+      `${selector} {
+         fill: var(--map-euskalki-fill, #b9c3ce);
+         fill-opacity: var(--map-euskalki-opacity, 1);
+         stroke: var(--map-euskalki-stroke, #a6b1bd);
+       }`
+    );
+  }
 
   for (const [label, info] of Object.entries(MODEL_LABELS)) {
     // runner-up zone: same color, faint + dashed border (rule first so active wins on ties)
@@ -163,8 +212,15 @@ function highlightLabel(modelLabel, secondaryLabel) {
   if (!svgRoot) return;
   if (MODEL_LABELS[modelLabel]) {
     svgRoot.setAttribute("data-active-label", modelLabel);
+    const euskalki = EUSKALKI_OF[modelLabel];
+    if (euskalki) {
+      svgRoot.setAttribute("data-active-euskalki", euskalki);
+    } else {
+      svgRoot.removeAttribute("data-active-euskalki");
+    }
   } else {
     svgRoot.removeAttribute("data-active-label");
+    svgRoot.removeAttribute("data-active-euskalki");
   }
   if (MODEL_LABELS[secondaryLabel] && secondaryLabel !== modelLabel) {
     svgRoot.setAttribute("data-secondary-label", secondaryLabel);
@@ -176,6 +232,7 @@ function highlightLabel(modelLabel, secondaryLabel) {
 function clearHighlight() {
   if (svgRoot) {
     svgRoot.removeAttribute("data-active-label");
+    svgRoot.removeAttribute("data-active-euskalki");
     svgRoot.removeAttribute("data-secondary-label");
   }
   if (badge) badge.classList.remove("visible");
@@ -187,12 +244,13 @@ function pinLabel(modelLabel, secondaryLabel, confidence) {
   const info = MODEL_LABELS[modelLabel];
   if (info && badge && badgeSwatch && badgeName) {
     badgeSwatch.style.backgroundColor = info.color;
-    const pct = confidence != null ? ` (${(confidence * 100).toFixed(0)}%)` : "";
-    badgeName.textContent = info.name + pct;
-    const secondary = MODEL_LABELS[secondaryLabel];
+    const pct = confidence != null ? `${(confidence * 100).toFixed(0)}%` : "";
+    // Primary: the recognizable euskalki (dialect). Secondary: the specific
+    // azpieuskalki (sub-dialect) plus confidence.
+    const euskalki = EUSKALKI_NAMES[EUSKALKI_OF[modelLabel]] || info.name;
+    badgeName.textContent = euskalki;
     if (badgeSecondary) {
-      badgeSecondary.textContent =
-        secondary && secondaryLabel !== modelLabel ? `· ${secondary.name}?` : "";
+      badgeSecondary.textContent = pct ? `${info.name} · ${pct}` : info.name;
     }
     badge.classList.add("visible");
   }

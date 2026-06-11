@@ -3,12 +3,9 @@
 Basque (Euskara) dialect and sub-dialect identification running entirely in
 the browser using WebAssembly (fastText).
 
-## 🧪 Demos
+## 🌐 Website
 
-| Demo | URL | Model |
-|------|-----|-------|
-| **Euskalkiak** (dialect) | [itzune.eus/nongoeuskara](https://itzune.eus/nongoeuskara) | 2 models, 34MB — batua/dialectal → 5 euskalkis |
-| **Azpieuskalkiak** (sub-dialect) | [itzune.eus/nongoeuskara/azpieuskalki](https://itzune.eus/nongoeuskara/azpieuskalki) | 1 model, 31MB — 9 azpieuskalkis + 430 towns |
+[https://itzune.eus/nongoeuskara/](https://itzune.eus/nongoeuskara/)
 
 ## How it works
 

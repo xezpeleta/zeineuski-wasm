@@ -73,10 +73,24 @@ export async function loadModel(onProgress) {
   return model;
 }
 
+/**
+ * Normalize text to match training preprocessing.
+ * fastText's C++ getLine() treats hyphens as part of a word (it doesn't
+ * split on '-'), so if the model was trained with hyphen-separated tokens,
+ * we must replace hyphens with spaces to match.
+ */
+function normalizeText(text) {
+  return text
+    .replace(/\n/g, " ")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function predict(text) {
   if (!_loaded) throw new Error("Model not loaded. Call loadModel() first.");
 
-  text = text.replace(/\n/g, " ").trim();
+  text = normalizeText(text);
   if (!text) {
     return {
       azpieuskalki: null, confidence: 0, name: "No text",

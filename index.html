@@ -624,7 +624,7 @@
       const ex = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
       textarea.value = ex;
       textarea.dispatchEvent(new Event("input"));
-      textarea.focus();
+      // Don't focus the textarea on mobile — avoid the keyboard popping up
     });
   </script>
 

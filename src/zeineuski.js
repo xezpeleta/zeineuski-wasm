@@ -84,11 +84,25 @@ export async function loadModels(onProgress) {
   return { binaryModel, dialectModel };
 }
 
+/**
+ * Normalize text to match training preprocessing.
+ * fastText's C++ getLine() treats hyphens as part of a word (it doesn't
+ * split on '-'), so if the model was trained with hyphen-separated tokens,
+ * we must replace hyphens with spaces to match.
+ */
+function normalizeText(text) {
+  return text
+    .replace(/\n/g, " ")
+    .replace(/-/g, " ")     // split hyphenated compounds
+    .replace(/\s+/g, " ")   // collapse multiple spaces
+    .trim();
+}
+
 // ── Prediction ──
 export function predict(text, threshold = 0.7) {
   if (!_loaded) throw new Error("Models not loaded. Call loadModels() first.");
 
-  text = text.replace(/\n/g, " ").trim();
+  text = normalizeText(text);
   if (!text) {
     return {
       dialect: "uncertain",
@@ -157,7 +171,7 @@ export function predict(text, threshold = 0.7) {
 export function predictDetailed(text) {
   if (!_loaded) throw new Error("Models not loaded. Call loadModels() first.");
 
-  text = text.replace(/\n/g, " ").trim();
+  text = normalizeText(text);
   if (!text) return { binary: [], dialect: [] };
 
   const binary = [];
